@@ -11,12 +11,12 @@ let region = args[2];
 
 const usage = "Usage: bun run s3Uploader.js <bucket> <directory> [<region>]";
 
-if (bucket === undefined || bucket === "--help" || bucket === "-h") {
+if (!bucket || bucket === "--help" || bucket === "-h") {
   console.log(usage);
   process.exit(1);
 }
 
-if (directory === undefined || directory === "--help" || directory === "-h") {
+if (!directory || directory === "--help" || directory === "-h") {
   console.log(usage);
   process.exit(1);
 }
@@ -62,8 +62,7 @@ for (const [i, file] of files.entries()) {
     console.log(`[File ${i + 1}] Uploading ${params.Key}...`);
 
     // read file and upload to s3
-    const fileBody = readFileSync(directory + '/' + file);
-    params.Body = fileBody;
+    params.Body = readFileSync(directory + '/' + file);
 
     try {
       await s3.send(new PutObjectCommand(params));
