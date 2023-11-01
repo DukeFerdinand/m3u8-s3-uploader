@@ -3,16 +3,40 @@
 import {PutObjectCommand, S3Client} from '@aws-sdk/client-s3';
 import {readdirSync, readFileSync} from "node:fs"
 
-// create s3 client
-const s3 = new S3Client({
-  region: 'us-west-2',
-});
-
 // get arguments from command line to determine directory to upload
 const args = Bun.argv.slice(2);
-const directory = args[0];
+const bucket = args[0];
+const directory = args[1];
+let region = args[2];
 
-// create params object for s3 upload
+const usage = "Usage: bun run s3Uploader.js <bucket> <directory> [<region>]";
+
+if (bucket === undefined || bucket === "--help" || bucket === "-h") {
+  console.log(usage);
+  process.exit(1);
+}
+
+if (directory === undefined || directory === "--help" || directory === "-h") {
+  console.log(usage);
+  process.exit(1);
+}
+
+if (region === "--help" || region === "-h") {
+  console.log(usage);
+  process.exit(1);
+}
+
+// region is optional, default to us-west-2
+if (region === undefined) {
+  console.log("No region specified, defaulting to us-west-2");
+  console.log(usage.replace("Usage:", "To specify a region, use:"));
+  region = "us-west-2";
+}
+
+// create s3 client
+const s3 = new S3Client({
+  region,
+});
 
 // get files from directory
 const files = readdirSync(directory);
@@ -30,7 +54,7 @@ if (!files.includes('index.m3u8')) {
 for (const [i, file] of files.entries()) {
     const directoryName = directory.split('/').pop() || '';
     const params = {
-      Bucket: 'seasidefm-vods',
+      Bucket: bucket,
       Body: new Buffer('...'),
       Key: directoryName + '/' + file
     }
