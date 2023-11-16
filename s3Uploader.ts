@@ -66,10 +66,10 @@ for (let i = 0; i < cpuCount; i++) {
   splitFiles.push(new Array<string>());
 }
 
-// for (const file of files) {
-//   const index = files.indexOf(file);
-//   splitFiles[index % cpuCount].push(file);
-// }
+for (const file of files) {
+  const index = files.indexOf(file);
+  splitFiles[index % cpuCount].push(file);
+}
 
 for (const [i, fileGroup] of splitFiles.entries()) {
   const worker = new Worker(new URL('worker.ts', import.meta.url).href);
