@@ -1,6 +1,5 @@
 // this script is used to upload a directory to s3 bucket
 
-import {PutObjectCommand, S3Client} from '@aws-sdk/client-s3';
 import {readdirSync, readFileSync} from "node:fs"
 import {cpus} from "node:os"
 
@@ -8,7 +7,8 @@ import {cpus} from "node:os"
 const args = Bun.argv.slice(2);
 const bucket = args[0];
 const directory = args[1];
-let region = args[2];
+let region: string | undefined = args[2];
+let doubleCpu = Boolean(args[3]);
 
 const usage = "Usage: bun run s3Uploader.js <bucket> <directory> [<region>]";
 
@@ -25,6 +25,11 @@ if (!directory || directory === "--help" || directory === "-h") {
 if (region === "--help" || region === "-h") {
   console.log(usage);
   process.exit(1);
+}
+
+if (region === "--double-cpu" || region === "-d") {
+  doubleCpu = true;
+  region = undefined;
 }
 
 // region is optional, default to us-west-2
@@ -50,7 +55,10 @@ if (!files.includes('index.m3u8')) {
 console.log(`Uploading ${files.length} files to ${bucket}...`);
 
 // Get CPU count for parallel uploads
-const cpuCount = cpus().length;
+if (doubleCpu) {
+  console.log("Doubling CPU count for parallel uploads");
+}
+const cpuCount = cpus().length * (doubleCpu ? 2 : 1);
 const splitFiles = [];
 
 // Split files into chunks for parallel uploads
