@@ -58,10 +58,10 @@ for (let i = 0; i < cpuCount; i++) {
   splitFiles.push(new Array<string>());
 }
 
-for (const file of files) {
-  const index = files.indexOf(file);
-  splitFiles[index % cpuCount].push(file);
-}
+// for (const file of files) {
+//   const index = files.indexOf(file);
+//   splitFiles[index % cpuCount].push(file);
+// }
 
 for (const [i, fileGroup] of splitFiles.entries()) {
   const worker = new Worker(new URL('worker.ts', import.meta.url).href);
@@ -74,6 +74,12 @@ for (const [i, fileGroup] of splitFiles.entries()) {
   worker.addEventListener("error", (err) => {
     console.log(err);
     process.exit(1);
+  })
+
+  worker.addEventListener("message", (event) => {
+    if (event.data === "done") {
+      worker.terminate();
+    }
   })
 
   worker.postMessage({

@@ -39,8 +39,7 @@ self.onmessage = async (event: MessageEvent) => {
     }
   }
 
-  self.postMessage(`[Worker ${workerId}] Finished uploading ${files.length} files to ${bucket}. Shutting down worker...`);
-
   await new Promise(resolve => setTimeout(resolve, 1000));
-  self.terminate();
+  console.log(`[Worker ${workerId}] Finished uploading ${files.length} files to ${bucket}`);
+  self.postMessage("done");
 }
